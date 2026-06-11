@@ -14,7 +14,8 @@ class LunaTrainingApp:
         parser.add_argument('--num-workers', help = 'Number of worker processes for background data loading',
                             default =8,
                             type=int)#khi thấy arg num worker thì thấy giá trị int ngay sao nó
-        
+        parser.add_argument('--batch-size', help='batch size used for training',default=32,type=int)
+        parser.add_argument('--epochs',help='Number of epochs to train for',default=1,type=int,)
         #line63
 
         self.cli_args = parser.parse_args(sys_argv)
