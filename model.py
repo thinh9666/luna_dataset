@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 
 
-class LunaModel(nn.Module):
+class LunaBlock(nn.Module):
     def __init__(self, in_channels, conv_channels):
         super().__init__()
 
