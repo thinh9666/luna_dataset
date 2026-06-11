@@ -1,5 +1,5 @@
 import logging
-log =  logging.getLogger(__name__)
+log =  logging.getLogger(__name__) #tạo logger có tên là helper
 
 def run(app_cls, *argv):#run(LunaTrainingApp, '--epochs=1')
     #app_cls là class app tôi muốn chạy, *argv là các tham số truyền thêm
