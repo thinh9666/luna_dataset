@@ -8,13 +8,14 @@ from torch.optim import SGD
 from model import LunaModel
 from dsets import LunaDataset
 from torch.utils.data import DataLoader
+import torch.nn as nn
 log = logging.getLogger(__name__)
 class LunaTrainingApp:
     def __init__(self, sys_argv = None):
         #python -m p2ch13.training --num-workers=4 --epochs=1
         if sys_argv is None:
         #nếu người dùng ko đưa vào argv thì lấy argv từ command line
-            sys_argv = sys.arg[1:] #[--num-workers=4 , --epochs=1]
+            sys_argv = sys.argv[1:] #[--num-workers=4 , --epochs=1]
         
         parser = argparse.ArgumentParser()
         parser.add_argument('--num-workers', help = 'Number of worker processes for background data loading',
