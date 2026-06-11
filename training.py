@@ -7,7 +7,7 @@ import logging
 from torch.optim import SGD
 from model import LunaModel
 from dsets import LunaDataset
-from torch.utils.data import DataLoader,Data
+from torch.utils.data import DataLoader
 log = logging.getLogger(__name__)
 class LunaTrainingApp:
     def __init__(self, sys_argv = None):
