@@ -60,5 +60,21 @@ class LunaTrainingApp:
             pin_memory = self.use_cuda,
         )
         return train_dl
+    def initValDl(self):
+        val_ds = LunaDataset(
+            val_stride=10,
+            isValSet_bool= True
+        )
+        batch_size = self.cli_args.batch_size
+        if self.use_cuda:
+            batch_size *= torch.cuda.device_count()
+        val_dl = DataLoader(
+            val_ds,
+            batch_size = batch_size,
+            num_workers = self.cli_args.num_workers,
+            pin_memory = self.use_cuda,
+        )
+        return val_dl
+
 if __name__ == '__main__':
     LunaTrainingApp().main()
