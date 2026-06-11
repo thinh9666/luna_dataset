@@ -2,6 +2,7 @@
 import sys
 import argparse
 import datetime
+
 class LunaTrainingApp:
     def __init__(self, sys_argv = None):
         #python -m p2ch13.training --num-workers=4 --epochs=1
@@ -18,5 +19,5 @@ class LunaTrainingApp:
 
         self.cli_args = parser.parse_args(sys_argv)
         self.time_str = datetime.datetime.now().strftime('%Y-%m-%d_%H.%M.%S')
-if __name__ == '__main__'
+if __name__ == '__main__':
     LunaTrainingApp().main()
