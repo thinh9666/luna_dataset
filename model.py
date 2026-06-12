@@ -17,7 +17,7 @@ class LunaBlock(nn.Module):
         ) #output  [batch, conv_channels, 32, 48, 48]
         self.relu2 = nn.ReLU(inplace=True)
 
-        self.maxpool = nn.MaxPool3d(kernel= 2, stride=2)
+        self.maxpool = nn.MaxPool3d(kernel_size= 2, stride=2)
         #output [batch, conv_channels, 16, 24, 24]
 
     def forward(self, input_batch):
