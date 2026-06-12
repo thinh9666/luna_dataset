@@ -1,23 +1,24 @@
 import math
 import torch
 import torch.nn as nn
-
+import math
 
 class LunaBlock(nn.Module):
     def __init__(self, in_channels, conv_channels):
         super().__init__()
-
+        #input là [batch, in_channels, 32, 48, 48]
         self.conv1 = nn.Conv3d(
-            in_channels, conv_channels, kernel_size=3, padding=1, bias=True
-        )
-        self.relu1 = nn.ReLU(inplace=True)
-
+            in_channels,conv_channels, kernel_size=3, padding=1,bias=True
+        ) #output  [batch, conv_channels, 32, 48, 48]
+        self.relu1 = nn.ReLU(inplace=True)#ko cần tạo tensor mới
+        
         self.conv2 = nn.Conv3d(
             conv_channels, conv_channels, kernel_size=3, padding=1, bias=True
-        )
+        ) #output  [batch, conv_channels, 32, 48, 48]
         self.relu2 = nn.ReLU(inplace=True)
 
-        self.maxpool = nn.MaxPool3d(2, 2)
+        self.maxpool = nn.MaxPool3d(kernel= 2, stride=2)
+        #output [batch, conv_channels, 16, 24, 24]
 
     def forward(self, input_batch):
         block_out = self.conv1(input_batch)
@@ -34,14 +35,15 @@ class LunaModel(nn.Module):
         super().__init__()
 
         self.tail_batchnorm = nn.BatchNorm3d(1)
+        #tính mean, variance cho  [batch, __, 32, 48, 48] rồi chuẩn hóa
 
-        self.block1 = LunaBlock(in_channels, conv_channels)
-        self.block2 = LunaBlock(conv_channels, conv_channels * 2)
-        self.block3 = LunaBlock(conv_channels * 2, conv_channels * 4)
-        self.block4 = LunaBlock(conv_channels * 4, conv_channels * 8)
-
-        self.head_linear = nn.Linear(1152, 2)
-        self.head_softmax = nn.Softmax(dim=1)
+        self.block1 = LunaBlock(in_channels, conv_channels) #out [batch,conv_channels, 16,24,24]
+        self.block2 = LunaBlock(conv_channels, conv_channels * 2) #out [batch,conv_channels*2 , 8,12,12]
+        self.block3 = LunaBlock(conv_channels * 2, conv_channels * 4) #out [batch,conv_channels*4 , 4,6,6]
+        self.block4 = LunaBlock(conv_channels * 4, conv_channels * 8) #out [batch,conv_channels*8 , 2,3,3]
+                #nếu conv_channel = 8 thì output là  [batch,64,2,2,3] => flatten thành [batch,1152]
+        self.head_linear = nn.Linear(1152, 2) # output  [batch,2]
+        self.head_softmax = nn.Softmax(dim=1) 
 
         self._init_weights()
 
@@ -76,3 +78,24 @@ class LunaModel(nn.Module):
         linear_output = self.head_linear(conv_flat)
 
         return linear_output, self.head_softmax(linear_output)
+        #khi train dùng logits, khi predict dùng head_softmax
+    def _init_weights(self):
+        #self.modules() là method có sẵn trong pytorch khi kế thừa nn.Module
+        #Nó trả về tất cả module/layer bên trong model, gồm cả model chính và các layer con, bao gồm chính nó
+        for m in self.modules():
+            if type(m) in {
+                nn.Linear, nn.Conv3d, nn.Conv2d, nn.ConvTranspose2d,
+                nn.ConvTranspose3d
+            }:
+                nn.init.kaiming_normal_( # dấu _ nghĩa là sửa in-place tensor
+                    m.weight.data,
+                    a = 0, # a là negative_slope của LeakyReLU.
+                    #Với ReLU thường thì negative_slope = 0.
+                    mode = 'fan_out', #fan out thì gradient backward ổn định hơn
+                    nonlinearity = 'relu' #initialize cho biết sẽ có relu activation phía sau
+                )
+                if m.bias is not None:
+                    fan_in, fan_out = nn.init._calculate_fan_in_and_fan_out(m.weight.data)
+                    bound = 1/math.sqrt(fan_out)
+                    nn.init.uniform_(m.bias,-bound,bound)
+                
