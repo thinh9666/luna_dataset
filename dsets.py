@@ -156,7 +156,7 @@ class Ct:
 @functools.lru_cache(1, typed=True)
 def getCt(series_uid):
   return Ct(series_uid)
-@functools.lru_cache(maxsize=None)
+@functools.lru_cache(maxsize=1)
 def getCtRawCandidate(series_uid, center_xyz, width_irc):
     ct = getCt(series_uid) # lấy ct có series_uid đó
     ct_chunk, center_irc = ct.getRawCandidate(center_xyz, width_irc)
