@@ -197,7 +197,7 @@ class LunaDataset(Dataset):
         # candidate_t shape sau unsqueeze: (1, 32, 48, 48)
         # số 1 là channel dimension
         candidate_t = torch.from_numpy(candidate_a).to(torch.float32)
-        candidate_t = candidate_t.unsqueeze(0)# thêm batch dimension
+        candidate_t = candidate_t.unsqueeze(0)# thêm channel dimension
         # Label dạng 2 class:
         # [1, 0] = không phải nodule
         # [0, 1] = là nodule
