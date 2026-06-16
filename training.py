@@ -162,7 +162,6 @@ class LunaTrainingApp:
         negPred_mask = metrics_t[METRICS_PRED_NDX] <= classificationThreshold #mask dự đoán nhỏ hơn 0.5
         posLabel_mask = ~negLabel_mask
         posPred_mask = ~negPred_mask
-
         neg_count = int(negLabel_mask.sum()) #int chuyển từ tensor sang python int
         pos_count = int(posLabel_mask.sum())
 
