@@ -144,12 +144,19 @@ class Ct:
       for axis, center_val in enumerate(center_irc):
           start_ndx = int(round(center_val - width_irc[axis]/2))#75,336,317
           end_ndx = int(start_ndx + width_irc[axis])#107,384,365
+          
+          if start_ndx < 0: # bé hơn 0 thì cho thành 0
+              start_ndx = 0
+              end_ndx = start_ndx + width_irc[axis]
+          if end_ndx > self.hu_a.shape[axis]:
+              end_ndx = self.hu_a.shape[axis]
+              start_ndx = end_ndx - width_irc[axis]
           slice_list.append(slice(start_ndx, end_ndx))
-          #slice_list = [
-          #slice(75, 107),
-          #slice(336, 384),
-          #slice(317, 365)
-          #]
+            #slice_list = [
+            #slice(75, 107),
+            #slice(336, 384),
+            #slice(317, 365)
+            #]
       ct_chunk = self.hu_a[tuple(slice_list)]#tuple các slice
       return ct_chunk, center_irc # trả về chunk đã crop và trung tâm chunk
   
@@ -186,6 +193,7 @@ class LunaDataset(Dataset):
         return len(self.candidateInfo_list)
 
     def __getitem__(self, index):
+        print("Bắt đầu __getitem__:", index)
         candidateInfo_tup = self.candidateInfo_list[index]
         width_irc = (32,48,48)
         candidate_a, center_irc = getCtRawCandidate(
@@ -205,10 +213,12 @@ class LunaDataset(Dataset):
             not candidateInfo_tup.isNodule_bool,
             candidateInfo_tup.isNodule_bool,
         ],dtype=torch.long)
+        print("Xong __getitem__:", index)
         return (
             candidate_t, # chunk đã được crop
             pos, #label [0,1] hoặc [1,0]
             candidateInfo_tup.series_uid,#uid
             torch.tensor(center_irc),#tâm đã chuyển sang irc
         )
+    
 
