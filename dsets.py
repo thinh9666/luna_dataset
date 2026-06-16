@@ -193,7 +193,6 @@ class LunaDataset(Dataset):
         return len(self.candidateInfo_list)
 
     def __getitem__(self, index):
-        print("Bắt đầu __getitem__:", index)
         candidateInfo_tup = self.candidateInfo_list[index]
         width_irc = (32,48,48)
         candidate_a, center_irc = getCtRawCandidate(
@@ -213,7 +212,6 @@ class LunaDataset(Dataset):
             not candidateInfo_tup.isNodule_bool,
             candidateInfo_tup.isNodule_bool,
         ],dtype=torch.long)
-        print("Xong __getitem__:", index)
         return (
             candidate_t, # chunk đã được crop
             pos, #label [0,1] hoặc [1,0]
