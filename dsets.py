@@ -20,7 +20,7 @@ CandidateInfoTuple = namedtuple(
 IrcTuple = collections.namedtuple("IrcTuple", ["index", "row", "col"])
 XyzTuple = collections.namedtuple("XyzTuple", ["x", "y", "z"])
 @functools.lru_cache(1)
-def getCandidateInfoToList(require_on_disk=True):
+def getCandidateInfoToList(require_on_disk=True):# train gọi 1 lần val gọi 1 lần nên lru cache 1  là đủ
     data_directory = Path(f"{mhd_data_folder}")
     mhd_files = list(Path(mhd_data_folder).glob("*.mhd"))
     #trả về danh sách các đường dẫn có chứa đuôi .mhd
@@ -160,10 +160,10 @@ class Ct:
       ct_chunk = self.hu_a[tuple(slice_list)]#tuple các slice
       return ct_chunk, center_irc # trả về chunk đã crop và trung tâm chunk
   
-@functools.lru_cache(1, typed=True)
+@functools.lru_cache(28, typed=True)
 def getCt(series_uid):
   return Ct(series_uid)
-@functools.lru_cache(maxsize=1)
+@functools.lru_cache(maxsize=28)
 def getCtRawCandidate(series_uid, center_xyz, width_irc):
     ct = getCt(series_uid) # lấy ct có series_uid đó
     ct_chunk, center_irc = ct.getRawCandidate(center_xyz, width_irc)
@@ -193,6 +193,13 @@ class LunaDataset(Dataset):
         return len(self.candidateInfo_list)
 
     def __getitem__(self, index):
+        '''
+        lấy 1 candidate
+        → xem candidate đó thuộc CT scan nào
+        → load CT scan đó nếu chưa có trong cache
+        → crop 1 vùng 32x48x48
+        → trả sample
+        '''
         candidateInfo_tup = self.candidateInfo_list[index]
         width_irc = (32,48,48)
         candidate_a, center_irc = getCtRawCandidate(
