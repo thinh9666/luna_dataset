@@ -11,12 +11,52 @@ from torch.utils.data import DataLoader
 import torch.nn as nn
 from tqdm import tqdm
 import numpy as np
+from pathlib import Path
 METRICS_LABEL_NDX = 0 # label thật các sample
 METRICS_PRED_NDX = 1 # xác suất label dự đoán các sample 
 METRICS_LOSS_NDX = 2 # loss của các sample
 METRICS_SIZE = 3
 log = logging.getLogger(__name__)
-class LunaTrainingApp:
+log_train = logging.getLogger("training")
+log_val = logging.getLogger("validation")
+def settingLogging(log_dir="/content/luna_dataset/logs"):
+    log_dir = Path(log_dir)
+    log_dir.mkdir(parents=True,exist_ok=True)
+    formatter = logging.Formatter(
+        "%(asctime)s %(levelname)s pid:%(process)d "
+        "%(name)s:%(lineno)d:%(funcName)s %(message)s"
+    )#2026-06-17 08:30:12,123 INFO pid:3821 training:145:main E1 trn 0.4321 loss, 98.5% correct
+    root_logger = logging.getLogger()# lấy root logger, logger cha cao nhất
+    root_logger.setLevel(logging.INFO)# chỉ nhận log từ info trở lên, bỏ debug
+    root_logger.handlers.clear() #xóa handler cũ để tránh log bị lặp
+    #Nếu không xóa handler cũ thì mỗi lần bạn gọi lại setupLogging() nó sẽ add thêm handler mới chồng lên handler cũ.
+ 
+    console_handler = logging.StreamHandler()#dùng để in log ra màn hình/console, thay vì ghi vào file.
+    console_handler.setFormatter(formatter)
+    root_logger.addHandler(console_handler)#  root logger sẽ in ra console
+
+    train_handler = logging.FileHandler(log_dir/"training.log",mode="a")
+    train_handler.setLevel(logging.INFO)
+    train_handler.setFormatter(formatter)
+
+    val_handler = logging.FileHandler(log_dir/"validation.log",mode="a")
+    val_handler.setLevel(logging.INFO)
+    val_handler.setFormatter(formatter)
+
+    train_log = logging.getLogger("training")
+    val_log = logging.getLogger("validation")
+    train_log.setLevel(logging.INFO)# set level mức đầu
+    val_log.setLevel(logging.INFO)
+
+    train_log.handlers.clear()#xóa hết handler đang gắn trực tiếp vào train_log và val_log.
+    val_log.handlers.clear()
+
+    train_log.addHandler(train_handler)
+    val_log.addHandler(val_handler)
+    train_log.propagate = False # ko propagate tới logger root
+    val_log.propagate = False
+
+class LunaTrainingApp: 
     def __init__(self, sys_argv = None):
         #python -m p2ch13.training --num-workers=4 --epochs=1
         if sys_argv is None:
@@ -158,6 +198,8 @@ class LunaTrainingApp:
                 )
         return valMetrics_g.to('cpu')
     def logMetrics(self,epoch_ndx,mode_str,metrics_t,classificationThreshold=0.5,):
+        metrics_log  =log_train if mode_str =="trn" else log_val
+
         negLabel_mask = metrics_t[METRICS_LABEL_NDX] <= classificationThreshold #mask label nhỏ hơn 0.5
         negPred_mask = metrics_t[METRICS_PRED_NDX] <= classificationThreshold #mask dự đoán nhỏ hơn 0.5
         posLabel_mask = ~negLabel_mask
@@ -178,18 +220,18 @@ class LunaTrainingApp:
         metrics_dict['correct/pos'] = pos_correct / np.float32(pos_count) * 100 # trong các pos thật sự thì dự đoán đúng bao nhiêu
         #recall lớp pos
 
-        log.info(
+        metrics_log .info(
             f"E{epoch_ndx} {mode_str:8} {metrics_dict['loss/all']:.4f} loss, "
             f"{metrics_dict['correct/all']:-5.1f}% correct"
         )
 
-        log.info(
+        metrics_log .info(
             f"E{epoch_ndx} {mode_str + '_neg':8} {metrics_dict['loss/neg']:.4f} loss, "
             f"{metrics_dict['correct/neg']:-5.1f}% correct "
             f"({neg_correct} of {neg_count})"
         )
 
-        log.info(
+        metrics_log .info(
             f"E{epoch_ndx} {mode_str + '_pos':8} {metrics_dict['loss/pos']:.4f} loss, "
             f"{metrics_dict['correct/pos']:-5.1f}% correct "
             f"({pos_correct} of {pos_count})"
@@ -207,4 +249,5 @@ class LunaTrainingApp:
         #train_dl.dataset giữ tham chiếu đến dataset gốc là train_ds
         #train_dl.daset tương đương train_ds
 if __name__ == '__main__':
+    settingLogging()
     LunaTrainingApp().main()
