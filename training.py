@@ -11,7 +11,9 @@ from torch.utils.data import DataLoader
 import torch.nn as nn
 from tqdm import tqdm
 import numpy as np
-from pathlib import Path
+from pathlib import Path 
+from torch.utils.tensorboard import SummaryWriter
+import os
 METRICS_LABEL_NDX = 0 # label thật các sample
 METRICS_PRED_NDX = 1 # xác suất label dự đoán các sample 
 METRICS_LOSS_NDX = 2 # loss của các sample
@@ -80,6 +82,8 @@ class LunaTrainingApp:
         self.model= self.initModel()
         self.optimizer = self.initOptimizer()
         self.totalTrainingSamples_count = 0
+        self.trn_writer = None
+        self.val_writer = None
     def initModel(self):
         model =LunaModel()
         if self.use_cuda:
@@ -197,7 +201,23 @@ class LunaTrainingApp:
                     batch_ndx,batch_tup,val_dl.batch_size,valMetrics_g
                 )
         return valMetrics_g.to('cpu')
+    def initTensorboardWriters(self):
+        log_dir = os.path.join("runs",self.time_str) # run/2026-06-19_15.30.10
+        self.trn_writer = SummaryWriter(
+            log_dir = log_dir + '-trn_cls' #run/2026-06-19_15.30.10-trn_cls
+        )
+        self.val_writer= SummaryWriter(
+            log_dir = log_dir +"-val_cls"
+             #run/2026-06-19_15.30.10-val
+        )
     def logMetrics(self,epoch_ndx,mode_str,metrics_t,classificationThreshold=0.5,):
+        self.initTensorboardWriters()
+        if mode_str == "trn":
+            writer = self.trn_writer
+        else:
+            writer = self.val_writer
+
+        
         metrics_log  =log_train if mode_str =="trn" else log_val
 
         negLabel_mask = metrics_t[METRICS_LABEL_NDX] <= classificationThreshold #mask label nhỏ hơn 0.5
@@ -219,7 +239,14 @@ class LunaTrainingApp:
         #recall lớp neg
         metrics_dict['correct/pos'] = pos_correct / np.float32(pos_count) * 100 # trong các pos thật sự thì dự đoán đúng bao nhiêu
         #recall lớp pos
+        for key, value in metrics_dict.items():
+            writer.add_scalar(
+                key, # tên biểu đồ
+                value, #trục y
+                self.totalTrainingSamples_count #trục x
+            )
 
+        writer.flush()#writer.flush() dùng để ép các dữ liệu đang nằm trong bộ đệm được ghi ngay xuống file log của TensorBoard.
         metrics_log .info(
             f"E{epoch_ndx} {mode_str:8} {metrics_dict['loss/all']:.4f} loss, "
             f"{metrics_dict['correct/all']:-5.1f}% correct"
@@ -240,14 +267,21 @@ class LunaTrainingApp:
     def main(self):
         train_dl = self.initTrainDl() # một DataLoader
         val_dl = self.initValDl() # một dataloader
-        for epoch_ndx in range(1,self.cli_args.epochs +1):
-            trnMetrics_t = self.doTraining(epoch_ndx,train_dl)
-            self.logMetrics(epoch_ndx,'trn',trnMetrics_t)
+        try:
+            for epoch_ndx in range(1,self.cli_args.epochs +1):
+                trnMetrics_t = self.doTraining(epoch_ndx,train_dl)
+                self.logMetrics(epoch_ndx,'trn',trnMetrics_t)
 
-            valMetrics_t= self.doValidation(epoch_ndx,val_dl)
-            self.logMetrics(epoch_ndx, 'val', valMetrics_t)
+                valMetrics_t= self.doValidation(epoch_ndx,val_dl)
+                self.logMetrics(epoch_ndx, 'val', valMetrics_t)
         #train_dl.dataset giữ tham chiếu đến dataset gốc là train_ds
         #train_dl.daset tương đương train_ds
+        finally:
+            if self.trn_writer is not None:
+                self.trn_writer.close()
+
+            if self.val_writer is not None:
+                self.val_writer.close()
 if __name__ == '__main__':
     settingLogging()
     LunaTrainingApp().main()
