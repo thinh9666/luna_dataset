@@ -202,7 +202,7 @@ class LunaTrainingApp:
                 )
         return valMetrics_g.to('cpu')
     def initTensorboardWriters(self):
-        log_dir = os.path.join("runs",self.time_str) # run/2026-06-19_15.30.10
+        log_dir = os.path.join("/content/luna_dataset/runs",self.time_str) # run/2026-06-19_15.30.10
         self.trn_writer = SummaryWriter(
             log_dir = log_dir + '-trn_cls' #run/2026-06-19_15.30.10-trn_cls
         )
@@ -211,7 +211,8 @@ class LunaTrainingApp:
              #run/2026-06-19_15.30.10-val
         )
     def logMetrics(self,epoch_ndx,mode_str,metrics_t,classificationThreshold=0.5,):
-        self.initTensorboardWriters()
+        if self.trn_writer is None:
+            self.initTensorboardWriters()
         if mode_str == "trn":
             writer = self.trn_writer
         else:
