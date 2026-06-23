@@ -72,7 +72,8 @@ class LunaTrainingApp:
                             type=int)#khi thấy arg num worker thì thấy giá trị int ngay sao nó
         parser.add_argument('--batch-size', help='batch size used for training',default=32,type=int)
         parser.add_argument('--epochs',help='Number of epochs to train for',default=1,type=int,)
-        parser.add_argument('--balanced', help = "Balance the training data to half positive",
+        parser.add_argument('--balanced',
+                            help = "Balance the training data to half positive",
                             action="store_true",default=False)
                     #store_true nghĩa là nếu xuất hiện balanced thì giá trị của balanced sẽ là true, ko cần viết --balanced true
                     #default=false là nếu ko nhập balanced sẽ là false
@@ -102,7 +103,8 @@ class LunaTrainingApp:
     def initTrainDl(self):
         train_ds = LunaDataset(
             val_stride = 10,
-            isValSet_bool = False
+            isValSet_bool = False,
+            ratio_int = int(self.cli_args.balanced),#ratio_int mặc định là 1
         )
         batch_size = self.cli_args.batch_size
         if self.use_cuda:
@@ -120,6 +122,7 @@ class LunaTrainingApp:
         val_ds = LunaDataset(
             val_stride=10,
             isValSet_bool= True
+
         )
         batch_size = self.cli_args.batch_size
         if self.use_cuda:
