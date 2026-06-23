@@ -72,6 +72,10 @@ class LunaTrainingApp:
                             type=int)#khi thấy arg num worker thì thấy giá trị int ngay sao nó
         parser.add_argument('--batch-size', help='batch size used for training',default=32,type=int)
         parser.add_argument('--epochs',help='Number of epochs to train for',default=1,type=int,)
+        parser.add_argument('--balanced', help = "Balance the training data to half positive",
+                            action="store_true",default=False)
+                    #store_true nghĩa là nếu xuất hiện balanced thì giá trị của balanced sẽ là true, ko cần viết --balanced true
+                    #default=false là nếu ko nhập balanced sẽ là false
         #line63
         
         self.cli_args = parser.parse_args(sys_argv) # nếu tham số là --help thì in ra rồi dừng luôn
@@ -228,8 +232,12 @@ class LunaTrainingApp:
         neg_count = int(negLabel_mask.sum()) #int chuyển từ tensor sang python int
         pos_count = int(posLabel_mask.sum())
 
-        neg_correct = int((negLabel_mask & negPred_mask).sum())#int chuyển từ tensor sang python int
-        pos_correct = int((posLabel_mask & posPred_mask).sum())
+        TrueNeg_count = neg_correct = int((negLabel_mask & negPred_mask).sum())#int chuyển từ tensor sang python int
+        TruePos_count = pos_correct = int((posLabel_mask & posPred_mask).sum())
+
+        falseNeg_count = pos_count - TruePos_count
+        falsePos_count = neg_count - TrueNeg_count
+        #precision,recall
         metrics_dict={}
         metrics_dict["loss/all"] = metrics_t[METRICS_LOSS_NDX].mean() #tổng loss toàn bộ
         metrics_dict["loss/neg"] = metrics_t[METRICS_LOSS_NDX,negLabel_mask].mean() # tong loss cac label ko phai nodule
@@ -240,6 +248,10 @@ class LunaTrainingApp:
         #recall lớp neg
         metrics_dict['correct/pos'] = pos_correct / np.float32(pos_count) * 100 # trong các pos thật sự thì dự đoán đúng bao nhiêu
         #recall lớp pos
+        
+        metrics_dict["pr/recall"] = recall = TruePos_count / np.float32(TruePos_count + falseNeg_count) # thực ra giống với correct/pos
+        metrics_dict["pr/precision"] = precision = TruePos_count / np.float32(TruePos_count + falsePos_count) # precision
+        metrics_dict["pr/f1_score"] = 2 * (recall * precision) / (precision + recall)
         for key, value in metrics_dict.items():
             writer.add_scalar(
                 key, # tên biểu đồ
@@ -263,6 +275,18 @@ class LunaTrainingApp:
             f"E{epoch_ndx} {mode_str + '_pos':8} {metrics_dict['loss/pos']:.4f} loss, "
             f"{metrics_dict['correct/pos']:-5.1f}% correct "
             f"({pos_correct} of {pos_count})"
+        )
+        metrics_log.info(
+            f"E{epoch_ndx} {mode_str:8} "
+            f"{metrics_dict['pr/precision']:.4f} precision, "
+            f"{metrics_dict['pr/recall']:.4f} recall, "
+            f"{metrics_dict['pr/f1_score']:.4f} f1 score"
+        )
+
+        metrics_log.info(
+            f"E{epoch_ndx} {mode_str:8} "
+            f"TP:{TruePos_count} TN:{TrueNeg_count} "
+            f"FP:{falsePos_count} FN:{falseNeg_count}"
         )
         
     def main(self):

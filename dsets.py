@@ -6,7 +6,7 @@ import glob
 
 import numpy as np
 import torch
-
+import random
 from pathlib import Path
 from collections import namedtuple
 from torch.utils.data import Dataset
@@ -174,6 +174,7 @@ class LunaDataset(Dataset):
         val_stride=0,
         isValSet_bool=None,
         series_uid=None,
+        ratio_int = 0, #chia đều negative và positive
         ):
         self.candidateInfo_list = copy.copy(getCandidateInfoToList())
         #phải copy để ko trỏ thẳng list gốc trong cache
@@ -181,6 +182,13 @@ class LunaDataset(Dataset):
             self.candidateInfo_list = [
         x for x in self.candidateInfo_list if x.series_uid == series_uid
         ]
+        self.ratio_int = ratio_int
+        self.negative_list = [
+            nt for nt in self.candidateInfo_list if not nt.isNodule_bool # nt là namedtuple
+        ] # danh sách các candidateInfo_list mà là negative
+        self.positive_list = [
+            nt for nt in self.candidateInfo_list if nt.isNodule_bool
+        ] # danh sách các candidateInfo_list mà là positive
 
         if isValSet_bool:
             assert val_stride > 0 ,val_stride
@@ -189,8 +197,17 @@ class LunaDataset(Dataset):
         elif val_stride > 0: # trường hợp ko phải val thì xóa các dữ liệu val
             del self.candidateInfo_list[::val_stride] #xóa xong các phần tử các sẽ dồn lên
             assert self.candidateInfo_list
+    
+    def shuffleSamples(self):
+        if self.ratio_int:
+            random.shuffle(self.negative_list)
+            random.shuffle(self.positive_list)  
     def __len__(self):
-        return len(self.candidateInfo_list)
+        if self.ratio_int:
+            return 200000
+        else:
+            return len(self.candidateInfo_list)
+    #số sample 1 epoch dựa vào số __len__ trả về
 
     def __getitem__(self, index):
         '''
@@ -200,6 +217,14 @@ class LunaDataset(Dataset):
         → crop 1 vùng 32x48x48
         → trả sample
         '''
+        if self.ratio_int: # ví dụ ratio_int = 2 là + - - + - - + #4
+            pos_index = index // (self.ratio_int + 1) # 4// (2+1) = 1
+            if index % (self.ratio_int +1) > 0: #ví dụ ratio_int =2 mà index = 4  nghĩa là negative
+                neg_index = index - 1 - pos_index # 4 -1 - 1 = 2
+                neg_index = neg_index % len(self.negative_list) # vì negative_list < len(dataset) nên làm vậy để ko bị tràn
+            else: # positive nếu  index % (self.ratio_int +1) = 0
+                pos_index = pos_index % len(self.positive_list)
+
         candidateInfo_tup = self.candidateInfo_list[index]
         width_irc = (32,48,48)
         candidate_a, center_irc = getCtRawCandidate(
