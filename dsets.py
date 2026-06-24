@@ -160,7 +160,7 @@ class Ct:
       ct_chunk = self.hu_a[tuple(slice_list)]#tuple các slice
       return ct_chunk, center_irc # trả về chunk đã crop và trung tâm chunk
   
-@functools.lru_cache(10, typed=True)
+@functools.lru_cache(16, typed=True)
 def getCt(series_uid):
   return Ct(series_uid)
 @functools.lru_cache(maxsize=1)
