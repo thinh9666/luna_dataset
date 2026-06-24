@@ -1,0 +1,5 @@
+2026-06-24 22:34:26,678 INFO pid:926 validation:267:logMetrics E1 val      0.6931 loss,  99.8% correct
+2026-06-24 22:34:26,679 INFO pid:926 validation:272:logMetrics E1 val_neg  0.6931 loss, 100.0% correct (5681 of 5681)
+2026-06-24 22:34:26,679 INFO pid:926 validation:278:logMetrics E1 val_pos  0.6932 loss,   0.0% correct (0 of 13)
+2026-06-24 22:34:26,679 INFO pid:926 validation:283:logMetrics E1 val      nan precision, 0.0000 recall, nan f1 score
+2026-06-24 22:34:26,679 INFO pid:926 validation:290:logMetrics E1 val      TP:0 TN:5681 FP:0 FN:13
