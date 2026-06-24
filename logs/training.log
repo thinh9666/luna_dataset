@@ -1,0 +1,7 @@
+2026-06-24 21:32:11,314 INFO pid:926 training:95:initModel Using CUDA, 1 devices
+2026-06-24 21:34:34,689 INFO pid:926 training:95:initModel Using CUDA, 1 devices
+2026-06-24 22:32:51,120 INFO pid:926 training:267:logMetrics E1 trn      0.7149 loss,  49.9% correct
+2026-06-24 22:32:51,121 INFO pid:926 training:272:logMetrics E1 trn_neg  0.7248 loss,  50.2% correct (1256 of 2500)
+2026-06-24 22:32:51,121 INFO pid:926 training:278:logMetrics E1 trn_pos  0.7051 loss,  49.6% correct (1240 of 2500)
+2026-06-24 22:32:51,121 INFO pid:926 training:283:logMetrics E1 trn      0.4992 precision, 0.4960 recall, 0.4976 f1 score
+2026-06-24 22:32:51,121 INFO pid:926 training:290:logMetrics E1 trn      TP:1240 TN:1256 FP:1244 FN:1260
