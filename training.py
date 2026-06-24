@@ -171,6 +171,7 @@ class LunaTrainingApp:
         return loss_g.mean()
     def doTraining(self,epoch_ndx,train_dl): # training ở mỗi epoch
         self.model.train()#chuyển sang training mode
+        train_dl.dataset.shuffleSamples()# đảo thứ tự bên trong 2 list
         trnMetrics_g = torch.zeros(
             METRICS_SIZE,
             len(train_dl.dataset), # số sample trong dataset, train_dl.dataset là tham chiếu tới train_ds
