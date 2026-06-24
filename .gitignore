@@ -1,0 +1,14 @@
+# LUNA dataset
+subset*/
+*.raw
+*.mhd
+luna_data/
+data/
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+EOF
