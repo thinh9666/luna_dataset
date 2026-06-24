@@ -78,7 +78,6 @@ class LunaTrainingApp:
                     #store_true nghĩa là nếu xuất hiện balanced thì giá trị của balanced sẽ là true, ko cần viết --balanced true
                     #default=false là nếu ko nhập balanced sẽ là false
         #line63
-        
         self.cli_args = parser.parse_args(sys_argv) # nếu tham số là --help thì in ra rồi dừng luôn
         self.time_str = datetime.datetime.now().strftime('%Y-%m-%d_%H.%M.%S')
         
@@ -89,6 +88,18 @@ class LunaTrainingApp:
         self.totalTrainingSamples_count = 0
         self.trn_writer = None
         self.val_writer = None
+        self.checkpoint_path = "/content/gdrive/MyDrive/luna_checkpoints/luna_latest.pt"
+        self.start_epoch = 1
+        if os.path.exists(self.checkpoint_path):
+            checkpoint = torch.load(self.checkpoint_path, map_location=self.device)
+
+            self.model.load_state_dict(checkpoint["model_state"])
+            self.optimizer.load_state_dict(checkpoint["optimizer_state"])
+            self.totalTrainingSamples_count = checkpoint["totalTrainingSamples_count"]
+            self.start_epoch = checkpoint["epoch"] + 1
+
+            log.info(f"Loaded checkpoint from epoch {checkpoint['epoch']}")
+
     def initModel(self):
         model =LunaModel()
         if self.use_cuda:
@@ -169,6 +180,16 @@ class LunaTrainingApp:
 
         #line 238
         return loss_g.mean()
+    
+    def saveCheckpoint(self, epoch_ndx):
+        os.makedirs(os.path.dirname(self.checkpoint_path), exist_ok=True)
+        torch.save({
+            "epoch": epoch_ndx,
+            "model_state": self.model.state_dict(),
+            "optimizer_state": self.optimizer.state_dict(),
+            "totalTrainingSamples_count": self.totalTrainingSamples_count,
+        }, self.checkpoint_path)
+        log.info(f"Saved checkpoint: {self.checkpoint_path}")
     def doTraining(self,epoch_ndx,train_dl): # training ở mỗi epoch
         self.model.train()#chuyển sang training mode
         train_dl.dataset.shuffleSamples()# đảo thứ tự bên trong 2 list
@@ -210,7 +231,7 @@ class LunaTrainingApp:
                 )
         return valMetrics_g.to('cpu')
     def initTensorboardWriters(self):
-        log_dir = os.path.join("/content/luna_dataset/runs",self.time_str) # run/2026-06-19_15.30.10
+        log_dir = "/content/luna_dataset/runs" # run/2026-06-19_15.30.10 ( bỏ thời gian)
         self.trn_writer = SummaryWriter(
             log_dir = log_dir + '-trn_cls' #run/2026-06-19_15.30.10-trn_cls
         )
@@ -297,12 +318,14 @@ class LunaTrainingApp:
         train_dl = self.initTrainDl() # một DataLoader
         val_dl = self.initValDl() # một dataloader
         try:
-            for epoch_ndx in range(1,self.cli_args.epochs +1):
+            for epoch_ndx in range(self.start_epoch, self.start_epoch + self.cli_args.epochs):
                 trnMetrics_t = self.doTraining(epoch_ndx,train_dl)
                 self.logMetrics(epoch_ndx,'trn',trnMetrics_t)
 
                 valMetrics_t= self.doValidation(epoch_ndx,val_dl)
                 self.logMetrics(epoch_ndx, 'val', valMetrics_t)
+
+                self.saveCheckpoint(epoch_ndx)
         #train_dl.dataset giữ tham chiếu đến dataset gốc là train_ds
         #train_dl.daset tương đương train_ds
         finally:
