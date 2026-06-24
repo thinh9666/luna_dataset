@@ -205,7 +205,7 @@ class LunaDataset(Dataset):
             random.shuffle(self.positive_list)  
     def __len__(self):
         if self.ratio_int:
-            return 200000
+            return 5000
         else:
             return len(self.candidateInfo_list)
     #số sample 1 epoch dựa vào số __len__ trả về
