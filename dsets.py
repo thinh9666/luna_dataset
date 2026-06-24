@@ -226,7 +226,7 @@ class LunaDataset(Dataset):
                 candidateInfo_tup = self.negative_list[neg_index]
             else: # positive nếu  index % (self.ratio_int +1) = 0
                 pos_index = pos_index % len(self.positive_list)
-                candidateInfo_tup = self.pos_list[pos_index]
+                candidateInfo_tup = self.positive_list [pos_index]
         else:
             candidateInfo_tup = self.candidateInfo_list[index]
         width_irc = (32,48,48)
