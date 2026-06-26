@@ -231,7 +231,7 @@ class LunaDataset(Dataset):
             del self.candidateInfo_list[::val_stride] #xóa xong các phần tử các sẽ dồn lên
             assert self.candidateInfo_list
         #chia train-validation trước rồi mới lọc uid
-        
+
         if series_uid:# chỉ giữ các ct có uid nằm trong series_uid list
             if isinstance(series_uid, str):
                 series_uid_set = {series_uid}
@@ -259,7 +259,7 @@ class LunaDataset(Dataset):
             random.shuffle(self.positive_list)  
     def __len__(self):
         if self.ratio_int:
-            return 5000
+            return 500
         else:
             return len(self.candidateInfo_list)
     #số sample 1 epoch dựa vào số __len__ trả về

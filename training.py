@@ -198,7 +198,7 @@ class LunaTrainingApp:
         }, self.checkpoint_path)
         log.info(f"Saved checkpoint: {self.checkpoint_path}")
 
-    def doTraining(self,epoch_ndx,train_dl): # training ở mỗi epoch
+    def doTraining(self,epoch_ndx,train_dl,chunk_ndx= None): # training ở mỗi epoch
         self.model.train()#chuyển sang training mode
         train_dl.dataset.shuffleSamples()# đảo thứ tự bên trong 2 list
         trnMetrics_g = torch.zeros(
@@ -207,7 +207,7 @@ class LunaTrainingApp:
             device=self.device
         ) # ở gpu để lúc sau gán cho tương thích, nếu ko phải metrics_t[...] = label_g[:, 1].detach().cpu()
         train_progress = tqdm(train_dl,
-                              desc="E{} Training".format(epoch_ndx),#ví dụ E1 Training:  35%|███▌| .
+                              desc = f"E{epoch_ndx} C{chunk_ndx} Training",#ví dụ E1 C1 Training:  35%|███▌| .
                               total=len(train_dl))#tổng số batch
         for batch_ndx, batch_tup in enumerate(train_progress):
             self.optimizer.zero_grad()
@@ -338,7 +338,7 @@ class LunaTrainingApp:
 
                 trnMetrics_list = []
 
-                for series_uid_batch in self.chunks(all_series_uid_list, 10):
+                for chunk_ndx, series_uid_batch in enumerate(self.chunks(all_series_uid_list, 10), 1):
                     log.info(f"E{epoch_ndx} train on {len(series_uid_batch)} CTs")
 
                     train_dl = self.initTrainDl(series_uid_batch)
@@ -347,7 +347,7 @@ class LunaTrainingApp:
                         log.info("Skip CT batch because no positive samples.")
                         continue
 
-                    trnMetrics_t = self.doTraining(epoch_ndx, train_dl)
+                    trnMetrics_t = self.doTraining(epoch_ndx, train_dl,chunk_ndx)
                     trnMetrics_list.append(trnMetrics_t)
 
                 if not trnMetrics_list:#Nếu tất cả chunk bị skip thì trnMetrics_list rỗng và torch.cat() sẽ báo lỗi.
