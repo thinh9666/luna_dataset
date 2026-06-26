@@ -20,6 +20,8 @@ CandidateInfoTuple = namedtuple(
 
 IrcTuple = collections.namedtuple("IrcTuple", ["index", "row", "col"])
 XyzTuple = collections.namedtuple("XyzTuple", ["x", "y", "z"])
+
+
 @functools.lru_cache(1)
 def getCandidateInfoToList(require_on_disk=True):# train gọi 1 lần val gọi 1 lần nên lru cache 1  là đủ
     data_directory = Path(f"{mhd_data_folder}")
@@ -220,11 +222,6 @@ class LunaDataset(Dataset):
             self.augmentation = None
         self.candidateInfo_list = copy.copy(getCandidateInfoToList())
         #phải copy để ko trỏ thẳng list gốc trong cache
-        if series_uid:#nếu truyền series_uid , chỉ giữ các candidata có series_uid(1 ct scan)
-            self.candidateInfo_list = [
-        x for x in self.candidateInfo_list if x.series_uid == series_uid
-        ]
-        
 
         if isValSet_bool:
             assert val_stride > 0 ,val_stride
@@ -233,6 +230,21 @@ class LunaDataset(Dataset):
         elif val_stride > 0: # trường hợp ko phải val thì xóa các dữ liệu val
             del self.candidateInfo_list[::val_stride] #xóa xong các phần tử các sẽ dồn lên
             assert self.candidateInfo_list
+        #chia train-validation trước rồi mới lọc uid
+        
+        if series_uid:# chỉ giữ các ct có uid nằm trong series_uid list
+            if isinstance(series_uid, str):
+                series_uid_set = {series_uid}
+            else:
+                series_uid_set = set(series_uid)
+
+            self.candidateInfo_list = [
+                x for x in self.candidateInfo_list
+                if x.series_uid in series_uid_set
+            ]
+        
+
+ 
         self.ratio_int = ratio_int
         self.negative_list = [
             nt for nt in self.candidateInfo_list if not nt.isNodule_bool # nt là namedtuple

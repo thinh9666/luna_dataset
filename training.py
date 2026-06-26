@@ -111,13 +111,19 @@ class LunaTrainingApp:
         return model
     def initOptimizer(self):
         return SGD(self.model.parameters(), lr = 0.001, momentum=0.99)
-    def initTrainDl(self):
+    def chunks(self, lst, size):
+        for i in range(0, len(lst), size):
+            yield lst[i:i + size]
+    def initTrainDl(self,series_uid_batch = None):
         train_ds = LunaDataset(
             val_stride = 10,
             isValSet_bool = False,
             ratio_int = int(self.cli_args.balanced),#ratio_int mặc định là 1
-            augmentation_bool=True
+            augmentation_bool=True,
+            series_uid=series_uid_batch,
         )
+        if self.cli_args.balanced and len(train_ds.positive_list) == 0:
+            return None
         batch_size = self.cli_args.batch_size
         if self.use_cuda:
             batch_size *= torch.cuda.device_count()
@@ -191,6 +197,7 @@ class LunaTrainingApp:
             "totalTrainingSamples_count": self.totalTrainingSamples_count,
         }, self.checkpoint_path)
         log.info(f"Saved checkpoint: {self.checkpoint_path}")
+
     def doTraining(self,epoch_ndx,train_dl): # training ở mỗi epoch
         self.model.train()#chuyển sang training mode
         train_dl.dataset.shuffleSamples()# đảo thứ tự bên trong 2 list
@@ -316,19 +323,46 @@ class LunaTrainingApp:
         )
         
     def main(self):
-        train_dl = self.initTrainDl() # một DataLoader
-        val_dl = self.initValDl() # một dataloader
+        val_dl = self.initValDl()
+
+        from dsets import getCandidateInfoToList
+        import random
+
+        all_series_uid_list = sorted({
+            x.series_uid for x in getCandidateInfoToList()
+        })
+
         try:
             for epoch_ndx in range(self.start_epoch, self.start_epoch + self.cli_args.epochs):
-                trnMetrics_t = self.doTraining(epoch_ndx,train_dl)
-                self.logMetrics(epoch_ndx,'trn',trnMetrics_t)
+                random.shuffle(all_series_uid_list)
 
-                valMetrics_t= self.doValidation(epoch_ndx,val_dl)
+                trnMetrics_list = []
+
+                for series_uid_batch in self.chunks(all_series_uid_list, 10):
+                    log.info(f"E{epoch_ndx} train on {len(series_uid_batch)} CTs")
+
+                    train_dl = self.initTrainDl(series_uid_batch)
+
+                    if train_dl is None:
+                        log.info("Skip CT batch because no positive samples.")
+                        continue
+
+                    trnMetrics_t = self.doTraining(epoch_ndx, train_dl)
+                    trnMetrics_list.append(trnMetrics_t)
+
+                if not trnMetrics_list:#Nếu tất cả chunk bị skip thì trnMetrics_list rỗng và torch.cat() sẽ báo lỗi.
+                    raise RuntimeError(
+                        f"E{epoch_ndx}: Không có chunk training nào chứa positive sample."
+                    )
+
+                trnMetrics_t = torch.cat(trnMetrics_list, dim=1)
+                self.logMetrics(epoch_ndx, 'trn', trnMetrics_t)
+
+                valMetrics_t = self.doValidation(epoch_ndx, val_dl)
                 self.logMetrics(epoch_ndx, 'val', valMetrics_t)
 
                 self.saveCheckpoint(epoch_ndx)
-        #train_dl.dataset giữ tham chiếu đến dataset gốc là train_ds
-        #train_dl.daset tương đương train_ds
+
         finally:
             if self.trn_writer is not None:
                 self.trn_writer.close()
