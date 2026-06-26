@@ -116,6 +116,7 @@ class LunaTrainingApp:
             val_stride = 10,
             isValSet_bool = False,
             ratio_int = int(self.cli_args.balanced),#ratio_int mặc định là 1
+            augmentation_bool=True
         )
         batch_size = self.cli_args.batch_size
         if self.use_cuda:

@@ -3,6 +3,7 @@ import collections
 import copy
 import csv
 import glob
+import torchio as tio
 
 import numpy as np
 import torch
@@ -169,13 +170,54 @@ def getCtRawCandidate(series_uid, center_xyz, width_irc):
     ct_chunk, center_irc = ct.getRawCandidate(center_xyz, width_irc)
     return ct_chunk, center_irc #trả về ct chunk và tâm đã chuyển thành irc
 
+def getCtAugmentedCandidate(augmentation, series_uid, center_xyz, width_irc,use_cache=True):
+    if use_cache:
+        ct_chunk, center_irc = getCtRawCandidate(series_uid, center_xyz, width_irc)
+    else:
+        ct = getCt(series_uid)
+        ct_chunk, center_irc = ct.getRawCandidate(center_xyz, width_irc)
+        #ct_chunk shape là [depth, height, width]
+
+    ct_t =torch.tensor(ct_chunk).unsqueeze(0).to(torch.float32)
+    #thêm chiều   channel [1,depth,height,width]
+    subject = tio.Subject(
+        ct = tio.ScalarImage(tensor = ct_t)
+    )
+    augmented_subject = augmentation(subject)
+    # augmented_subject.ct.data vẫn có shape [1, D, H, W]
+    augmented_chunk_t = augmented_subject.ct.data
+    augmented_chunk_t = augmented_chunk_t.clamp(-1000,1000)#
+    # giống clip ở numpy
+    return augmented_chunk_t, center_irc
 class LunaDataset(Dataset):
     def __init__(self,
         val_stride=0,
         isValSet_bool=None,
         series_uid=None,
         ratio_int = 0, #chia đều negative và positive
+        augmentation_bool=False,
         ):
+        self.augmentation = None
+        if augmentation_bool:
+            self.augmentation = tio.Compose([
+                tio.RandomFlip(
+                    axes=(0, 1, 2),#0=depth,height,width, ko có chiều ko gian
+                    flip_probability=0.5# mỗi trục lật  xác suất 0.5
+                    #p=0.5 thì toàn bộ lật xác suất 0.5
+                ),
+                tio.RandomAffine(
+                    scales=(0.9, 1.1),#phóng to thu nhỏ ngẫu nhiên
+                    degrees=(10,0,0), # xoay ngẫu nhiên 10 độ, giữ nguyên depth, chỉ xoay width,height
+                    translation=3,
+                    p=0.75 # dịch chuyển ảnh tối đa 3 voxel
+                ),
+                tio.RandomNoise(
+                    std=(0,25), # noise từ 0 ->25
+                    p=0.25 #25% sample được thêm noise
+                ),
+            ])
+        else:
+            self.augmentation = None
         self.candidateInfo_list = copy.copy(getCandidateInfoToList())
         #phải copy để ko trỏ thẳng list gốc trong cache
         if series_uid:#nếu truyền series_uid , chỉ giữ các candidata có series_uid(1 ct scan)
@@ -230,16 +272,28 @@ class LunaDataset(Dataset):
         else:
             candidateInfo_tup = self.candidateInfo_list[index]
         width_irc = (32,48,48)
-        candidate_a, center_irc = getCtRawCandidate(
-            candidateInfo_tup.series_uid,
-            candidateInfo_tup.center_xyz,
-            width_irc,
-        )#trả về ct_chunk và tâm irc
+        if self.augmentation is not None:
+            candidate_t, center_irc = getCtAugmentedCandidate(
+                self.augmentation,
+                candidateInfo_tup.series_uid,
+                candidateInfo_tup.center_xyz,
+                width_irc,
+            )#đã thêm channel dimesnsion từ trước nên ko cần unsqueeze
+        else:
+            candidate_a, center_irc = getCtRawCandidate(
+                candidateInfo_tup.series_uid,
+                candidateInfo_tup.center_xyz,
+                width_irc,
+            )
+
+            candidate_t = torch.from_numpy(
+                candidate_a
+            ).to(torch.float32).unsqueeze(0)
+        #trả về ct_chunk và tâm irc
         # candidate_a shape: (32, 48, 48)
         # candidate_t shape sau unsqueeze: (1, 32, 48, 48)
         # số 1 là channel dimension
-        candidate_t = torch.from_numpy(candidate_a).to(torch.float32)
-        candidate_t = candidate_t.unsqueeze(0)# thêm channel dimension
+
         # Label dạng 2 class:
         # [1, 0] = không phải nodule
         # [0, 1] = là nodule
