@@ -1,7 +1,92 @@
-2026-06-24 21:32:11,314 INFO pid:926 training:95:initModel Using CUDA, 1 devices
-2026-06-24 21:34:34,689 INFO pid:926 training:95:initModel Using CUDA, 1 devices
-2026-06-24 22:32:51,120 INFO pid:926 training:267:logMetrics E1 trn      0.7149 loss,  49.9% correct
-2026-06-24 22:32:51,121 INFO pid:926 training:272:logMetrics E1 trn_neg  0.7248 loss,  50.2% correct (1256 of 2500)
-2026-06-24 22:32:51,121 INFO pid:926 training:278:logMetrics E1 trn_pos  0.7051 loss,  49.6% correct (1240 of 2500)
-2026-06-24 22:32:51,121 INFO pid:926 training:283:logMetrics E1 trn      0.4992 precision, 0.4960 recall, 0.4976 f1 score
-2026-06-24 22:32:51,121 INFO pid:926 training:290:logMetrics E1 trn      TP:1240 TN:1256 FP:1244 FN:1260
+2026-06-27 10:07:36,928 INFO pid:22878 training:106:initModel Using CUDA, 1 devices
+2026-06-27 10:08:06,553 INFO pid:22878 training:106:initModel Using CUDA, 1 devices
+2026-06-27 10:08:06,571 INFO pid:22878 training:389:main E1 train on 10 CTs
+2026-06-27 10:08:20,380 INFO pid:22878 training:389:main E1 train on 10 CTs
+2026-06-27 10:08:32,884 INFO pid:22878 training:389:main E1 train on 10 CTs
+2026-06-27 10:08:42,679 INFO pid:22878 training:389:main E1 train on 10 CTs
+2026-06-27 10:08:56,024 INFO pid:22878 training:389:main E1 train on 10 CTs
+2026-06-27 10:09:03,996 INFO pid:22878 training:389:main E1 train on 10 CTs
+2026-06-27 10:09:17,506 INFO pid:22878 training:389:main E1 train on 10 CTs
+2026-06-27 10:09:33,005 INFO pid:22878 training:389:main E1 train on 10 CTs
+2026-06-27 10:09:50,486 INFO pid:22878 training:389:main E1 train on 9 CTs
+2026-06-27 10:09:59,882 INFO pid:22878 training:343:logMetrics E1 trn      0.7106 loss,  50.1% correct
+2026-06-27 10:09:59,883 INFO pid:22878 training:348:logMetrics E1 trn_neg  0.7044 loss,  49.9% correct (1123 of 2250)
+2026-06-27 10:09:59,883 INFO pid:22878 training:354:logMetrics E1 trn_pos  0.7169 loss,  50.4% correct (1133 of 2250)
+2026-06-27 10:09:59,883 INFO pid:22878 training:359:logMetrics E1 trn      0.5013 precision, 0.5036 recall, 0.5024 f1 score
+2026-06-27 10:09:59,883 INFO pid:22878 training:366:logMetrics E1 trn      TP:1133 TN:1123 FP:1127 FN:1117
+2026-06-27 10:11:39,721 INFO pid:22878 training:199:saveCheckpoint Saved checkpoint: /content/gdrive/MyDrive/luna_checkpoints/luna_latest.pt
+2026-06-27 10:11:39,722 INFO pid:22878 training:389:main E2 train on 10 CTs
+2026-06-27 10:11:49,913 INFO pid:22878 training:389:main E2 train on 10 CTs
+2026-06-27 10:12:03,900 INFO pid:22878 training:389:main E2 train on 10 CTs
+2026-06-27 10:12:15,198 INFO pid:22878 training:389:main E2 train on 10 CTs
+2026-06-27 10:12:31,895 INFO pid:22878 training:389:main E2 train on 10 CTs
+2026-06-27 10:12:46,218 INFO pid:22878 training:389:main E2 train on 10 CTs
+2026-06-27 10:12:57,235 INFO pid:22878 training:389:main E2 train on 10 CTs
+2026-06-27 10:13:08,631 INFO pid:22878 training:389:main E2 train on 10 CTs
+2026-06-27 10:13:18,604 INFO pid:22878 training:389:main E2 train on 9 CTs
+2026-06-27 10:13:34,106 INFO pid:22878 training:343:logMetrics E2 trn      0.6932 loss,  50.2% correct
+2026-06-27 10:13:34,106 INFO pid:22878 training:348:logMetrics E2 trn_neg  0.6931 loss,  50.0% correct (1125 of 2250)
+2026-06-27 10:13:34,106 INFO pid:22878 training:354:logMetrics E2 trn_pos  0.6932 loss,  50.4% correct (1135 of 2250)
+2026-06-27 10:13:34,106 INFO pid:22878 training:359:logMetrics E2 trn      0.5022 precision, 0.5044 recall, 0.5033 f1 score
+2026-06-27 10:13:34,106 INFO pid:22878 training:366:logMetrics E2 trn      TP:1135 TN:1125 FP:1125 FN:1115
+2026-06-27 10:15:12,275 INFO pid:22878 training:199:saveCheckpoint Saved checkpoint: /content/gdrive/MyDrive/luna_checkpoints/luna_latest.pt
+2026-06-27 10:15:12,276 INFO pid:22878 training:389:main E3 train on 10 CTs
+2026-06-27 10:15:25,899 INFO pid:22878 training:389:main E3 train on 10 CTs
+2026-06-27 10:15:39,636 INFO pid:22878 training:389:main E3 train on 10 CTs
+2026-06-27 10:15:52,022 INFO pid:22878 training:389:main E3 train on 10 CTs
+2026-06-27 10:16:03,209 INFO pid:22878 training:389:main E3 train on 10 CTs
+2026-06-27 10:16:13,114 INFO pid:22878 training:389:main E3 train on 10 CTs
+2026-06-27 10:16:27,348 INFO pid:22878 training:389:main E3 train on 10 CTs
+2026-06-27 10:16:38,188 INFO pid:22878 training:389:main E3 train on 10 CTs
+2026-06-27 10:16:51,085 INFO pid:22878 training:389:main E3 train on 9 CTs
+2026-06-27 10:17:02,891 INFO pid:22878 training:343:logMetrics E3 trn      0.6931 loss,  50.2% correct
+2026-06-27 10:17:02,891 INFO pid:22878 training:348:logMetrics E3 trn_neg  0.6931 loss,  47.9% correct (1078 of 2250)
+2026-06-27 10:17:02,891 INFO pid:22878 training:354:logMetrics E3 trn_pos  0.6931 loss,  52.5% correct (1181 of 2250)
+2026-06-27 10:17:02,891 INFO pid:22878 training:359:logMetrics E3 trn      0.5019 precision, 0.5249 recall, 0.5131 f1 score
+2026-06-27 10:17:02,891 INFO pid:22878 training:366:logMetrics E3 trn      TP:1181 TN:1078 FP:1172 FN:1069
+2026-06-27 10:18:41,746 INFO pid:22878 training:199:saveCheckpoint Saved checkpoint: /content/gdrive/MyDrive/luna_checkpoints/luna_latest.pt
+2026-06-27 10:18:41,747 INFO pid:22878 training:389:main E4 train on 10 CTs
+2026-06-27 10:18:53,179 INFO pid:22878 training:389:main E4 train on 10 CTs
+2026-06-27 10:19:04,162 INFO pid:22878 training:389:main E4 train on 10 CTs
+2026-06-27 10:19:20,521 INFO pid:22878 training:389:main E4 train on 10 CTs
+2026-06-27 10:19:29,378 INFO pid:22878 training:389:main E4 train on 10 CTs
+2026-06-27 10:19:42,610 INFO pid:22878 training:389:main E4 train on 10 CTs
+2026-06-27 10:19:52,941 INFO pid:22878 training:389:main E4 train on 10 CTs
+2026-06-27 10:20:07,933 INFO pid:22878 training:389:main E4 train on 10 CTs
+2026-06-27 10:20:20,518 INFO pid:22878 training:389:main E4 train on 9 CTs
+2026-06-27 10:20:32,780 INFO pid:22878 training:343:logMetrics E4 trn      0.6932 loss,  49.9% correct
+2026-06-27 10:20:32,780 INFO pid:22878 training:348:logMetrics E4 trn_neg  0.6932 loss,  48.8% correct (1099 of 2250)
+2026-06-27 10:20:32,780 INFO pid:22878 training:354:logMetrics E4 trn_pos  0.6932 loss,  51.0% correct (1148 of 2250)
+2026-06-27 10:20:32,780 INFO pid:22878 training:359:logMetrics E4 trn      0.4993 precision, 0.5102 recall, 0.5047 f1 score
+2026-06-27 10:20:32,780 INFO pid:22878 training:366:logMetrics E4 trn      TP:1148 TN:1099 FP:1151 FN:1102
+2026-06-27 10:22:11,681 INFO pid:22878 training:199:saveCheckpoint Saved checkpoint: /content/gdrive/MyDrive/luna_checkpoints/luna_latest.pt
+2026-06-27 10:22:11,682 INFO pid:22878 training:389:main E5 train on 10 CTs
+2026-06-27 10:22:22,120 INFO pid:22878 training:389:main E5 train on 10 CTs
+2026-06-27 10:22:36,524 INFO pid:22878 training:389:main E5 train on 10 CTs
+2026-06-27 10:22:48,625 INFO pid:22878 training:389:main E5 train on 10 CTs
+2026-06-27 10:23:00,498 INFO pid:22878 training:389:main E5 train on 10 CTs
+2026-06-27 10:23:12,592 INFO pid:22878 training:389:main E5 train on 10 CTs
+2026-06-27 10:23:28,745 INFO pid:22878 training:389:main E5 train on 10 CTs
+2026-06-27 10:23:38,806 INFO pid:22878 training:389:main E5 train on 10 CTs
+2026-06-27 10:23:51,520 INFO pid:22878 training:389:main E5 train on 9 CTs
+2026-06-27 10:24:01,355 INFO pid:22878 training:343:logMetrics E5 trn      0.6932 loss,  50.2% correct
+2026-06-27 10:24:01,355 INFO pid:22878 training:348:logMetrics E5 trn_neg  0.6931 loss,  49.7% correct (1119 of 2250)
+2026-06-27 10:24:01,355 INFO pid:22878 training:354:logMetrics E5 trn_pos  0.6932 loss,  50.6% correct (1139 of 2250)
+2026-06-27 10:24:01,356 INFO pid:22878 training:359:logMetrics E5 trn      0.5018 precision, 0.5062 recall, 0.5040 f1 score
+2026-06-27 10:24:01,356 INFO pid:22878 training:366:logMetrics E5 trn      TP:1139 TN:1119 FP:1131 FN:1111
+2026-06-27 10:25:44,741 INFO pid:22878 training:199:saveCheckpoint Saved checkpoint: /content/gdrive/MyDrive/luna_checkpoints/luna_latest.pt
+2026-06-27 10:25:44,742 INFO pid:22878 training:389:main E6 train on 10 CTs
+2026-06-27 10:25:53,022 INFO pid:22878 training:389:main E6 train on 10 CTs
+2026-06-27 10:26:01,831 INFO pid:22878 training:389:main E6 train on 10 CTs
+2026-06-27 10:26:12,883 INFO pid:22878 training:389:main E6 train on 10 CTs
+2026-06-27 10:26:28,170 INFO pid:22878 training:389:main E6 train on 10 CTs
+2026-06-27 10:26:37,814 INFO pid:22878 training:389:main E6 train on 10 CTs
+2026-06-27 10:26:50,918 INFO pid:22878 training:389:main E6 train on 10 CTs
+2026-06-27 10:27:08,371 INFO pid:22878 training:389:main E6 train on 10 CTs
+2026-06-27 10:27:18,479 INFO pid:22878 training:389:main E6 train on 9 CTs
+2026-06-27 10:27:31,756 INFO pid:22878 training:343:logMetrics E6 trn      0.6932 loss,  50.1% correct
+2026-06-27 10:27:31,756 INFO pid:22878 training:348:logMetrics E6 trn_neg  0.6932 loss,  49.7% correct (1118 of 2250)
+2026-06-27 10:27:31,756 INFO pid:22878 training:354:logMetrics E6 trn_pos  0.6932 loss,  50.6% correct (1138 of 2250)
+2026-06-27 10:27:31,756 INFO pid:22878 training:359:logMetrics E6 trn      0.5013 precision, 0.5058 recall, 0.5035 f1 score
+2026-06-27 10:27:31,756 INFO pid:22878 training:366:logMetrics E6 trn      TP:1138 TN:1118 FP:1132 FN:1112
+2026-06-27 10:29:13,298 INFO pid:22878 training:199:saveCheckpoint Saved checkpoint: /content/gdrive/MyDrive/luna_checkpoints/luna_latest.pt

@@ -1,5 +1,30 @@
-2026-06-24 22:34:26,678 INFO pid:926 validation:267:logMetrics E1 val      0.6931 loss,  99.8% correct
-2026-06-24 22:34:26,679 INFO pid:926 validation:272:logMetrics E1 val_neg  0.6931 loss, 100.0% correct (5681 of 5681)
-2026-06-24 22:34:26,679 INFO pid:926 validation:278:logMetrics E1 val_pos  0.6932 loss,   0.0% correct (0 of 13)
-2026-06-24 22:34:26,679 INFO pid:926 validation:283:logMetrics E1 val      nan precision, 0.0000 recall, nan f1 score
-2026-06-24 22:34:26,679 INFO pid:926 validation:290:logMetrics E1 val      TP:0 TN:5681 FP:0 FN:13
+2026-06-27 10:11:39,655 INFO pid:22878 validation:343:logMetrics E1 val      0.6689 loss,  99.8% correct
+2026-06-27 10:11:39,656 INFO pid:22878 validation:348:logMetrics E1 val_neg  0.6688 loss, 100.0% correct (5681 of 5681)
+2026-06-27 10:11:39,656 INFO pid:22878 validation:354:logMetrics E1 val_pos  0.7181 loss,   0.0% correct (0 of 13)
+2026-06-27 10:11:39,656 INFO pid:22878 validation:359:logMetrics E1 val      0.0000 precision, 0.0000 recall, 0.0000 f1 score
+2026-06-27 10:11:39,656 INFO pid:22878 validation:366:logMetrics E1 val      TP:0 TN:5681 FP:0 FN:13
+2026-06-27 10:15:12,240 INFO pid:22878 validation:343:logMetrics E2 val      0.6931 loss,  98.5% correct
+2026-06-27 10:15:12,240 INFO pid:22878 validation:348:logMetrics E2 val_neg  0.6931 loss,  98.8% correct (5610 of 5681)
+2026-06-27 10:15:12,240 INFO pid:22878 validation:354:logMetrics E2 val_pos  0.6932 loss,   0.0% correct (0 of 13)
+2026-06-27 10:15:12,240 INFO pid:22878 validation:359:logMetrics E2 val      0.0000 precision, 0.0000 recall, 0.0000 f1 score
+2026-06-27 10:15:12,240 INFO pid:22878 validation:366:logMetrics E2 val      TP:0 TN:5610 FP:71 FN:13
+2026-06-27 10:18:41,703 INFO pid:22878 validation:343:logMetrics E3 val      0.6941 loss,   1.9% correct
+2026-06-27 10:18:41,703 INFO pid:22878 validation:348:logMetrics E3 val_neg  0.6941 loss,   1.7% correct (96 of 5681)
+2026-06-27 10:18:41,703 INFO pid:22878 validation:354:logMetrics E3 val_pos  0.6922 loss, 100.0% correct (13 of 13)
+2026-06-27 10:18:41,703 INFO pid:22878 validation:359:logMetrics E3 val      0.0023 precision, 1.0000 recall, 0.0046 f1 score
+2026-06-27 10:18:41,703 INFO pid:22878 validation:366:logMetrics E3 val      TP:13 TN:96 FP:5585 FN:0
+2026-06-27 10:22:11,635 INFO pid:22878 validation:343:logMetrics E4 val      0.6956 loss,   0.2% correct
+2026-06-27 10:22:11,635 INFO pid:22878 validation:348:logMetrics E4 val_neg  0.6956 loss,   0.0% correct (1 of 5681)
+2026-06-27 10:22:11,635 INFO pid:22878 validation:354:logMetrics E4 val_pos  0.6907 loss, 100.0% correct (13 of 13)
+2026-06-27 10:22:11,636 INFO pid:22878 validation:359:logMetrics E4 val      0.0023 precision, 1.0000 recall, 0.0046 f1 score
+2026-06-27 10:22:11,636 INFO pid:22878 validation:366:logMetrics E4 val      TP:13 TN:1 FP:5680 FN:0
+2026-06-27 10:25:44,705 INFO pid:22878 validation:343:logMetrics E5 val      0.6930 loss,  99.6% correct
+2026-06-27 10:25:44,705 INFO pid:22878 validation:348:logMetrics E5 val_neg  0.6930 loss,  99.8% correct (5670 of 5681)
+2026-06-27 10:25:44,705 INFO pid:22878 validation:354:logMetrics E5 val_pos  0.6933 loss,   0.0% correct (0 of 13)
+2026-06-27 10:25:44,705 INFO pid:22878 validation:359:logMetrics E5 val      0.0000 precision, 0.0000 recall, 0.0000 f1 score
+2026-06-27 10:25:44,705 INFO pid:22878 validation:366:logMetrics E5 val      TP:0 TN:5670 FP:11 FN:13
+2026-06-27 10:29:13,258 INFO pid:22878 validation:343:logMetrics E6 val      0.6932 loss,   1.3% correct
+2026-06-27 10:29:13,259 INFO pid:22878 validation:348:logMetrics E6 val_neg  0.6932 loss,   1.0% correct (59 of 5681)
+2026-06-27 10:29:13,259 INFO pid:22878 validation:354:logMetrics E6 val_pos  0.6931 loss, 100.0% correct (13 of 13)
+2026-06-27 10:29:13,259 INFO pid:22878 validation:359:logMetrics E6 val      0.0023 precision, 1.0000 recall, 0.0046 f1 score
+2026-06-27 10:29:13,259 INFO pid:22878 validation:366:logMetrics E6 val      TP:13 TN:59 FP:5622 FN:0
