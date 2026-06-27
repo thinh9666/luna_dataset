@@ -272,19 +272,66 @@ class LunaTrainingApp:
         falsePos_count = neg_count - TrueNeg_count
         #precision,recall
         metrics_dict={}
-        metrics_dict["loss/all"] = metrics_t[METRICS_LOSS_NDX].mean() #tổng loss toàn bộ
-        metrics_dict["loss/neg"] = metrics_t[METRICS_LOSS_NDX,negLabel_mask].mean() # tong loss cac label ko phai nodule
-        metrics_dict["loss/pos"] = metrics_t[METRICS_LOSS_NDX,posLabel_mask].mean()# tong loss cac label la nodule
-
-        metrics_dict["correct/all"] = (pos_correct + neg_correct) / np.float32(metrics_t.shape[1]) * 100 #accuracy
-        metrics_dict['correct/neg'] = neg_correct / np.float32(neg_count) * 100 # trong các neg thật sự thì dự đoán đúng bao nhiêu
+        metrics_dict["loss/all"] = metrics_t[METRICS_LOSS_NDX].mean().item() #tổng loss toàn bộ
+        metrics_dict["loss/neg"] = (
+            metrics_t[METRICS_LOSS_NDX, negLabel_mask].mean().item()
+            if neg_count > 0
+            else 0.0
+        ) # tong loss cac label ko phai nodule
+        metrics_dict["loss/pos"] = (
+            metrics_t[METRICS_LOSS_NDX, posLabel_mask].mean().item()
+            if pos_count > 0
+            else 0.0
+        )# tong loss cac label la nodule
+        sample_count = metrics_t.shape[1]
+        metrics_dict["correct/all"] = (
+            (pos_correct + neg_correct) / sample_count * 100
+            if sample_count > 0
+            else 0.0
+        ) #accuracy
+        metrics_dict["correct/neg"] = (
+            neg_correct / neg_count * 100
+            if neg_count > 0
+            else 0.0
+        ) # trong các neg thật sự thì dự đoán đúng bao nhiêu
         #recall lớp neg
-        metrics_dict['correct/pos'] = pos_correct / np.float32(pos_count) * 100 # trong các pos thật sự thì dự đoán đúng bao nhiêu
+        metrics_dict["correct/pos"] = (
+            pos_correct / pos_count * 100
+            if pos_count > 0
+            else 0.0
+        ) # trong các pos thật sự thì dự đoán đúng bao nhiêu
         #recall lớp pos
-        
-        metrics_dict["pr/recall"] = recall = TruePos_count / np.float32(TruePos_count + falseNeg_count) # thực ra giống với correct/pos
-        metrics_dict["pr/precision"] = precision = TruePos_count / np.float32(TruePos_count + falsePos_count) # precision
-        metrics_dict["pr/f1_score"] = 2 * (recall * precision) / (precision + recall)
+
+        recall_denominator = TruePos_count + falseNeg_count
+        precision_denominator = TruePos_count + falsePos_count
+
+        recall = (
+            TruePos_count / recall_denominator
+            if recall_denominator > 0
+            else 0.0
+        )
+
+        precision = (
+            TruePos_count / precision_denominator
+            if precision_denominator > 0
+            else 0.0
+        )
+
+        f1_score = (
+            2 * precision * recall / (precision + recall)
+            if precision + recall > 0
+            else 0.0
+        )
+
+        f1_score = (
+            2 * precision * recall / (precision + recall)
+            if precision + recall > 0
+            else 0.0
+        )
+
+        metrics_dict["pr/recall"] = recall # thực ra giống với correct/pos
+        metrics_dict["pr/precision"] = precision
+        metrics_dict["pr/f1_score"] = f1_score
         for key, value in metrics_dict.items():
             writer.add_scalar(
                 key, # tên biểu đồ
