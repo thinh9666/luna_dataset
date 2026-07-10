@@ -113,56 +113,70 @@ def xyz2irc(coord_xyz, origin_xyz, vxSize_xyz, direction_a):
     return IrcTuple(int(cri_a[2]), int(cri_a[1]), int(cri_a[0]))#đảo ngược lại thành I,R,C
 
 class Ct:
-  def __init__(self,series_uid):
-      import SimpleITK as sitk
-      mhd_path = glob.glob(f'{mhd_data_folder}/{series_uid}.mhd')[0]
-      #vì glob.glob luôn trả về một list, dù chỉ 1 file
-      ct_mhd = sitk.ReadImage(mhd_path)
-      #trả về SimpleITK Image object metadata, chứa ảnh CT + thông tin tọa độ.
-      ct_a = np.array(sitk.GetArrayFromImage(ct_mhd),dtype=np.float32)
-      #mảng voxel chứa giá trị HU
-      #chuyển nó thành NumPy array để mình xử lý bằng Python/PyTorch.
-      # CTs are natively expressed in https://en.wikipedia.org/wiki/Hounsfield_scale
-        # HU are scaled oddly, with 0 g/cc (air, approximately) being -1000 and 1 g/cc (water) being 0.
-        # The lower bound gets rid of negative density stuff used to indicate out-of-FOV
-        # The upper bound nukes any weird hotspots and clamps bone down
-      ct_a.clip(-1000, 1000, ct_a)
+    def __init__(self,series_uid):
+        import SimpleITK as sitk
+        mhd_path = glob.glob(f'{mhd_data_folder}/{series_uid}.mhd')[0]
+        #vì glob.glob luôn trả về một list, dù chỉ 1 file
+        ct_mhd = sitk.ReadImage(mhd_path)
+        #trả về SimpleITK Image object metadata, chứa ảnh CT + thông tin tọa độ.
+        ct_a = np.array(sitk.GetArrayFromImage(ct_mhd),dtype=np.float32)
+        #mảng voxel chứa giá trị HU
+        #chuyển nó thành NumPy array để mình xử lý bằng Python/PyTorch.
+        # CTs are natively expressed in https://en.wikipedia.org/wiki/Hounsfield_scale
+            # HU are scaled oddly, with 0 g/cc (air, approximately) being -1000 and 1 g/cc (water) being 0.
+            # The lower bound gets rid of negative density stuff used to indicate out-of-FOV
+            # The upper bound nukes any weird hotspots and clamps bone down
+        ct_a.clip(-1000, 1000, ct_a)
 
-      self.series_uid = series_uid
-      self.hu_a = ct_a
-      self.origin_xyz = XyzTuple(*ct_mhd.GetOrigin())#gốc tọa độ  của CT scan trong patient coordinate system
-      self.vxSize_xyz = XyzTuple(*ct_mhd.GetSpacing())#kích thước của mỗi voxel, đơn vị mm/voxel
-      self.direction_a = np.array(ct_mhd.GetDirection()).reshape(3, 3)#ma trận hướng của CT scan. Nó cho biết các trục của mảng CT có cùng hướng với trục XYZ hay bị đảo/xoay
-  def getRawCandidate(self, center_xyz, width_irc):
-    #width_irc chứa thông tin số lượng voxel mỗi trục
-    # ví dụ width_irc = (32, 48, 48)
-      center_irc = xyz2irc(
-          center_xyz,
-          self.origin_xyz,
-          self.vxSize_xyz,
-          self.direction_a,
-      )# trả về IrcTuple, chứa tọa độ I,R,C
-      #ví dụ ra center_irc = (91, 360, 341)
-      slice_list = []
-      for axis, center_val in enumerate(center_irc):
-          start_ndx = int(round(center_val - width_irc[axis]/2))#75,336,317
-          end_ndx = int(start_ndx + width_irc[axis])#107,384,365
-          
-          if start_ndx < 0: # bé hơn 0 thì cho thành 0
-              start_ndx = 0
-              end_ndx = start_ndx + width_irc[axis]
-          if end_ndx > self.hu_a.shape[axis]:
-              end_ndx = self.hu_a.shape[axis]
-              start_ndx = end_ndx - width_irc[axis]
-          slice_list.append(slice(start_ndx, end_ndx))
-            #slice_list = [
-            #slice(75, 107),
-            #slice(336, 384),
-            #slice(317, 365)
-            #]
-      ct_chunk = self.hu_a[tuple(slice_list)]#tuple các slice
-      return ct_chunk, center_irc # trả về chunk đã crop và trung tâm chunk
-  
+        self.series_uid = series_uid
+        self.hu_a = ct_a
+        self.origin_xyz = XyzTuple(*ct_mhd.GetOrigin())#gốc tọa độ  của CT scan trong patient coordinate system
+        self.vxSize_xyz = XyzTuple(*ct_mhd.GetSpacing())#kích thước của mỗi voxel, đơn vị mm/voxel
+        self.direction_a = np.array(ct_mhd.GetDirection()).reshape(3, 3)#ma trận hướng của CT scan. Nó cho biết các trục của mảng CT có cùng hướng với trục XYZ hay bị đảo/xoay
+    def getRawCandidate(self, center_xyz, width_irc):
+        #width_irc chứa thông tin số lượng voxel mỗi trục
+        # ví dụ width_irc = (32, 48, 48)
+        center_irc = xyz2irc(
+            center_xyz,
+            self.origin_xyz,
+            self.vxSize_xyz,
+            self.direction_a,
+        )# trả về IrcTuple, chứa tọa độ I,R,C
+        #ví dụ ra center_irc = (91, 360, 341)
+        slice_list = []
+        for axis, center_val in enumerate(center_irc):
+            start_ndx = int(round(center_val - width_irc[axis]/2))#75,336,317
+            end_ndx = int(start_ndx + width_irc[axis])#107,384,365
+            
+            if start_ndx < 0: # bé hơn 0 thì cho thành 0
+                start_ndx = 0
+                end_ndx = start_ndx + width_irc[axis]
+            if end_ndx > self.hu_a.shape[axis]:
+                end_ndx = self.hu_a.shape[axis]
+                start_ndx = end_ndx - width_irc[axis]
+            slice_list.append(slice(start_ndx, end_ndx))
+                #slice_list = [
+                #slice(75, 107),
+                #slice(336, 384),
+                #slice(317, 365)
+                #]
+        ct_chunk = self.hu_a[tuple(slice_list)]#tuple các slice
+        return ct_chunk, center_irc # trả về chunk đã crop và trung tâm chunk
+    def getSingleSlice(self,center_xyz, axis=0):
+        center_irc = xyz2irc(center_xyz,self.origin_xyz,self.vxSize_xyz, self.direction_a)
+        center_val = int(round(center_irc[axis]))#trả về số thứ tự lát cắt cần lấy
+        #ví dụ (91, 360, 341) thì lấy 91, nghĩa là lấy lát ở index = 91
+        
+        if axis == 0:
+            ct_slice = self.hu_a[center_val, :, :]
+        elif axis == 1:
+            ct_slice = self.hu_a[:, center_val, :]
+        elif axis == 2:
+            ct_slice = self.hu_a[:, :, center_val]
+        else:
+            raise ValueError("Invalid axis value. Must be 0, 1, or 2.")
+
+        return ct_slice, center_irc#trả về lát cắt và tâm irc của nó
 @functools.lru_cache(10, typed=True)
 def getCt(series_uid):
   return Ct(series_uid)
@@ -191,6 +205,7 @@ def getCtAugmentedCandidate(augmentation, series_uid, center_xyz, width_irc,use_
     augmented_chunk_t = augmented_chunk_t.clamp(-1000,1000)#
     # giống clip ở numpy
     return augmented_chunk_t, center_irc
+
 class LunaDataset(Dataset):
     def __init__(self,
         val_stride=0,
@@ -320,4 +335,44 @@ class LunaDataset(Dataset):
             torch.tensor(center_irc),#tâm đã chuyển sang irc
         )
     
+@functools.lru_cache(maxsize=8)
+def getCtSlice(series_uid, center_xyz):
+    ct = getCt(series_uid)
+    return ct.getSingleSlice(center_xyz) # trả về lát cắt index tại tâm center_xyz
 
+class luna2dsegmentation(LunaDataset):
+    def __getitem__(self,index):
+        if self.ratio_int: # ví dụ ratio_int = 2 là + - - + - - + #4
+            pos_index = index // (self.ratio_int + 1) # 4// (2+1) = 1
+            if index % (self.ratio_int +1) > 0: #ví dụ ratio_int =2 mà index = 4  nghĩa là negative
+                neg_index = index - 1 - pos_index # 4 -1 - 1 = 2
+                neg_index = neg_index % len(self.negative_list) # vì negative_list < len(dataset) nên làm vậy để ko bị tràn
+                candidateInfo_tup = self.negative_list[neg_index]
+            else: # positive nếu  index % (self.ratio_int +1) = 0
+                pos_index = pos_index % len(self.positive_list)
+                candidateInfo_tup = self.positive_list [pos_index]
+        else:
+            candidateInfo_tup = self.candidateInfo_list[index]
+        
+        ct_slice, center_irc = getCtSlice(
+            candidateInfo_tup.series_uid,
+            candidateInfo_tup.center_xyz
+        )#trả về lắt cắt rc và center_irc đã lấy từ lát cắt đó
+        ct_slice_t = torch.from_numpy(ct_slice).to(torch.float32)#chuyển sang torch float32
+
+        pos_t = torch.tensor(
+            [
+                not candidateInfo_tup.isNodule_bool,
+                candidateInfo_tup.isNodule_bool
+            ],
+            dtype=torch.long
+        )
+        return (
+            ct_slice_t,
+            pos_t,
+            candidateInfo_tup.series_uid,
+            torch.tensor(center_irc),
+        )
+
+
+        
