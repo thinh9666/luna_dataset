@@ -4,13 +4,16 @@ import copy
 import csv
 import glob
 import torchio as tio
-
+import os
 import numpy as np
 import torch
 import random
 from pathlib import Path
 from collections import namedtuple
 from torch.utils.data import Dataset
+from util.disk import getCache
+import json
+raw_cache = getCache('part2ch12_raw')
 mhd_data_folder = "/content/luna_data/subset0"
 
 CandidateInfoTuple = namedtuple(
@@ -177,6 +180,7 @@ class Ct:
             raise ValueError("Invalid axis value. Must be 0, 1, or 2.")
 
         return ct_slice, center_irc#trả về lát cắt và tâm irc của nó
+        #ct_slice là numpy.ndarray, #center_irc là IrcTuple(namedtuple)
 @functools.lru_cache(10, typed=True)
 def getCt(series_uid):
   return Ct(series_uid)
@@ -334,12 +338,13 @@ class LunaDataset(Dataset):
             candidateInfo_tup.series_uid,#uid
             torch.tensor(center_irc),#tâm đã chuyển sang irc
         )
-    
-@functools.lru_cache(maxsize=8)
+
+@raw_cache.memoize(typed=True)
 def getCtSlice(series_uid, center_xyz):
     ct = getCt(series_uid)
-    return ct.getSingleSlice(center_xyz) # trả về lát cắt index tại tâm center_xyz
-
+    ct_slice, center_irc= ct.getSingleSlice(center_xyz) # trả về lát cắt index tại tâm center_xyz
+    return ct_slice, center_irc
+    #ct_slice là numpy.ndarray, #center_irc là IrcTuple(namedtuple)
 class luna2dsegmentation(LunaDataset):
     def __getitem__(self,index):
         if self.ratio_int: # ví dụ ratio_int = 2 là + - - + - - + #4
@@ -368,11 +373,70 @@ class luna2dsegmentation(LunaDataset):
             dtype=torch.long
         )
         return (
-            ct_slice_t,
-            pos_t,
-            candidateInfo_tup.series_uid,
-            torch.tensor(center_irc),
+            ct_slice_t,#torch.Tensor
+            pos_t,#torch.Tensor 
+            candidateInfo_tup.series_uid, #str
+            torch.tensor(center_irc), #tensor
         )
 
 
+class FineTuningDataset(Dataset):
+    def __init__(
+        self,
+        fine_tuning_dir="/content/gdrive/MyDrive/luna_dataset/fine_tuning_dataset",
+    ):
+        self.fine_tuning_dir =fine_tuning_dir
+        metadata_filepath = os.path.join(
+            self.fine_tuning_dir,
+            "metadata.jsonl",
+        ) #data-unversioned/part2/fine-tuning/dataset/metadata.jsonl
+        if not os.path.exists(metadata_filepath):
+            raise FileNotFoundError(
+                f"Không tìm thấy metadata: {metadata_filepath}. "
+                "Hãy chạy generate_ct_images_and_masks() trước."
+            )
+        self.metadata_list = []
+        with open(
+            metadata_filepath,
+            "r",
+            encoding="utf-8"
+        ) as metadata_file:
+            for line in metadata_file:
+                line = line.strip()#danh sách mỗi dòng là json
+                if not line:
+                    continue
+                metadata = json.loads(line)
+                #{
+                #"index": int(ct_data_index), 
+                #"series_uid": str(series_uid),
+                #"center_irc": [int(x) for x in center_irc_list],
+                #"ct_file_name": str(relative_ct_path),
+                #"mask_file_name": str(relative_mask_path),
+                #}
+                self.metadata_list.append(metadata)# trả về list các dict
+    def __len__(self):
+        return len(self.metadata_list)
+    
+    def __getitem__(self,index):
+        metadata = self.metadata_list[index]
+        ct_image_path = os.path.join(
+            self.fine_tuning_dir,
+            metadata["ct_file_name"],#ct/15.png
+        )#data-unversioned/part2/fine-tuning/dataset/ct/15.png"
+
+        mask_image_path = os.path.join(
+            self.fine_tuning_dir,
+            metadata["mask_file_name"],
+        )#data-unversioned/part2/fine-tuning/dataset/mask/15.png"
+        series_uid = metadata["series_uid"]#str
+        center_irc = metadata["center_irc"]#python list chứa các int
+        return {
+            "series_uid": series_uid, #str
+            "center_irc": torch.tensor(#tensor 
+                center_irc,
+                dtype=torch.long,
+            ),
+            "ct_image_path": ct_image_path,#str
+            "mask_image_path": mask_image_path,#str
+        }
         
