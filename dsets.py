@@ -37,7 +37,7 @@ def getCandidateInfoToList(require_on_disk=True):# train gọi 1 lần val gọi
     #hàm stem là hàm của Path nhưng bỏ đi đuôi mở rộng
 
     diameter_dict = {}
-    with open('dlwpt-code-2e/data/part2/luna/annotations.csv', "r") as f:
+    with open('/content/dlwpt-code-2e/data/part2/luna/annotations.csv', "r") as f:
         for row in list(csv.reader(f))[1:]:#bỏ dòng header đầu
         #csv.reader(f) trả về iterator, nên phải bọc list
         #row là list các giá trị
@@ -57,7 +57,7 @@ def getCandidateInfoToList(require_on_disk=True):# train gọi 1 lần val gọi
         }
         '''
         candidate_info_list = []
-        with open('dlwpt-code-2e/data/part2/luna/candidates.csv', 'r') as f:
+        with open('/content/dlwpt-code-2e/data/part2/luna/candidates.csv', 'r') as f:
             for row in list(csv.reader(f))[1:]:
                 series_uid = row[0]
                 if series_uid not in present_on_disk_set and require_on_disk:
