@@ -52,7 +52,7 @@ class GzipDisk(Disk):#nén gzip => gọi Disk.store() để lưu
             #sau khi đọc xong, kiểm tra dữ liệu xem có phải bytes không
          # Chuyển cả tuple, NumPy array, namedtuple... thành bytes.
         serialized = pickle.dumps(value,protocol = pickle.HIGHEST_PROTOCOL)#chuyển value thành bytes
-        if isinstance(value,serialized):# xài
+        if isinstance(serialized, bytes):# xài
             value = gzip.compress(
                 serialized, compresslevel = 1
             )
