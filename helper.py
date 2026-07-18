@@ -222,7 +222,7 @@ def generate_ct_images_and_masks(
              # Với NumPy bool, PIL tạo mask nhị phân.
 
             mask_image_array = (
-                masks[0].astype(np.uint8) * 255
+                masks[0].astype(np.uint8)
             )#mode L tương thích các thư viện tốt hơn
             mask_image = Image.fromarray(mask_image_array,mode ='L')
 
